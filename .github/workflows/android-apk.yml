@@ -20,11 +20,19 @@ jobs:
           distribution: temurin
           java-version: '17'
       - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
       - name: Compilar
         working-directory: android
-        run: |
-          chmod +x gradlew
-          ./gradlew --no-daemon assembleDebug
+        run: gradle --no-daemon --stacktrace assembleDebug 2>&1 | tee ../build-log.txt
+      - name: Guardar el registro de la compilación
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: registro-compilacion
+          path: build-log.txt
+          if-no-files-found: ignore
       - name: Preparar el APK
         run: cp android/app/build/outputs/apk/debug/app-debug.apk EA1HG_SDR_remoto.apk
       - uses: actions/upload-artifact@v4
